@@ -16,7 +16,7 @@ function getJwtSecret(): string {
   return secret;
 }
 
-function signHostJwt(hostId: number): string {
+function signHostJwt(hostId: string): string {
   const secret = getJwtSecret();
   const payload = { sub: hostId, hostId };
   return jwt.sign(payload, secret, { expiresIn: JWT_EXPIRY });
@@ -126,19 +126,14 @@ router.get("/guesty", async (req, res) => {
         .json({ error: "Guesty OAuth is not configured on the server" });
     }
 
-    const hostIdParam =
+    const hostId =
       (req.query.hostId as string | undefined) ??
       (req.query.host_id as string | undefined);
 
-    if (!hostIdParam) {
+    if (!hostId) {
       return res
         .status(400)
         .json({ error: "hostId query parameter is required" });
-    }
-
-    const hostId = Number.parseInt(hostIdParam, 10);
-    if (!Number.isFinite(hostId)) {
-      return res.status(400).json({ error: "hostId must be a number" });
     }
 
     const host = await prisma.host.findUnique({
@@ -156,7 +151,7 @@ router.get("/guesty", async (req, res) => {
     url.searchParams.set("client_id", clientId);
     url.searchParams.set("redirect_uri", redirectUri);
     url.searchParams.set("scope", scope);
-    url.searchParams.set("state", hostId.toString());
+    url.searchParams.set("state", hostId);
 
     return res.redirect(url.toString());
   } catch (err) {
@@ -199,10 +194,7 @@ router.get("/guesty/callback", async (req, res) => {
         .json({ error: "Guesty OAuth is not configured on the server" });
     }
 
-    const hostId = Number.parseInt(state, 10);
-    if (!Number.isFinite(hostId)) {
-      return res.status(400).json({ error: "Invalid state parameter" });
-    }
+    const hostId = state;
 
     const tokenUrl = getGuestyTokenUrl();
 
