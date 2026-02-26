@@ -105,7 +105,7 @@ router.post("/login", async (req, res) => {
 });
 
 function getGuestyAuthUrl(): string {
-  return process.env.GUESTY_AUTH_URL ?? "https://id.guesty.com/oauth/authorize";
+  return process.env.GUESTY_AUTH_URL ?? "https://auth.guesty.com/oauth2/authorize";
 }
 
 function getGuestyTokenUrl(): string {
@@ -114,7 +114,7 @@ function getGuestyTokenUrl(): string {
 
 router.get("/guesty", async (req, res) => {
   try {
-    const clientId = process.env.GUESTY_CLIENT_ID;
+    const clientId = process.env.GUESTY_CLIENT_ID?.trim();
     const redirectUri = process.env.GUESTY_REDIRECT_URI;
     const scope =
       process.env.GUESTY_SCOPE ??
@@ -184,7 +184,7 @@ router.get("/guesty/callback", async (req, res) => {
         .json({ error: "Missing `code` or `state` query parameter" });
     }
 
-    const clientId = process.env.GUESTY_CLIENT_ID;
+    const clientId = process.env.GUESTY_CLIENT_ID?.trim();
     const clientSecret = process.env.GUESTY_CLIENT_SECRET;
     const redirectUri = process.env.GUESTY_REDIRECT_URI;
 
